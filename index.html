@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>EC CUBE ELECTROSOLUTIONS</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style1.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -18,13 +18,17 @@
       </div>
       <div class="brand-name">E-CUBE ELECTROSOLUTIONS</div>
     </div>
+    
+    <!-- Add the hamburger menu button -->
+    <button id="menu-toggle" class="menu-toggle">☰</button>
+    
     <div class="opt">
-      <nav class="options">
-        <a href="#">Home</a>
+      <nav id="options" class="options">
+        <a href="#home">Home</a>  <!-- Updated to match the ID -->
         <a href="#services">Services</a>
         <a href="#about-us">About Us</a>
-        <a href="#">Request Quote</a>
-        <a href="#">Contact Us</a>
+        <a href="#request-quote">Request Quote</a>
+        <a href="#contact-us">Contact Us</a>  <!-- Assuming you add an ID for this, or update as needed -->
       </nav>
     </div>
   </header>
@@ -57,11 +61,6 @@
           <i class="fas fa-user-cog"></i>
           <h3>Engineering Support</h3>
           <p>Expert DFM consultation from concept to production for optimal results.</p>
-        </div>
-        <div class="feature">
-          <i class="fas fa-clipboard-check"></i>
-          <h3>Quality & Compliance</h3>
-          <p>We meet IPC standards and deliver ISO-certified PCBs every time.</p>
         </div>
       </div>
     </section>
@@ -107,10 +106,219 @@
           <li><i class="fas fa-clock"></i> On-Time Delivery — Fast lead times</li>
           <li><i class="fas fa-check-circle"></i> Quality First — IPC-compliant process</li>
           <li><i class="fas fa-headset"></i> Client Support — Technical guidance</li>
-          <li><i class="fas fa-leaf"></i> Eco-Conscious — RoHS-compliant</li>
         </ul>
       </div>
     </section>
-  </main>
+
+    <section class="quote-section" id="request-quote">
+      <div class="quote-container">
+        <h2>PCB Instant Quote</h2>
+        <form class="quote-form" onsubmit="return validateForm(event)">
+          <div class="form-group">
+            <label for="layers">Layers</label>
+            <select id="layers" name="layers" value="2">
+              <option value="1">1</option>
+              <option value="2" selected>2</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="quantity">Quantity</label>
+            <input 
+              type="number" 
+              id="quantity" 
+              name="quantity" 
+              value="3" 
+              min="3" 
+              step="2"
+              title="Quantity must be a multiple of 3 or 5."
+              required
+            >
+            <small class="quantity-note" id="quantity-error-note">
+              Quantity must be in multiples of 3 or 5.
+            </small>
+          </div>
+
+          <div class="form-group dimensions">
+            <label>Dimensions (mm) - 15 to 350 mm</label>
+            <div class="dimension-inputs">
+              <input type="number" id="dim-x" name="dim-x" value="50" min="15" max="350" required>
+              <span>&times;</span>
+              <input type="number" id="dim-y" name="dim-y" value="40" min="15" max="350" required>
+            </div>
+            <small class="quantity-note" id="dim-error-note" style="display:none; color:red;">
+              Both dimensions must be between 15 and 350 mm.
+            </small>
+          </div>
+          
+          <button type="submit" class="instant-quote-btn">
+            Instant Quote <i class="fas fa-arrow-right"></i>
+          </button>
+        </form>
+        
+        <div id="quote-result" style="margin-top: 20px; padding: 15px; background-color: #e6ffe6; border: 1px solid #00cc00; border-radius: 5px; display:none;">
+            <h3>Your Instant Quote:</h3>
+            <p id="total-price-display" style="font-size: 1.5em; font-weight: bold; color: #008000;"></p>
+            <p style="font-size: 0.9em; color: #555;">(Includes ₹800 Setup Charges)</p>
+        </div>
+
+      </div>
+    </section>
+    </main>
+
+  <script>
+    // Constants from the problem description
+    const SETUP_CHARGES = 800;
+    
+    // Rate table derived from the handwritten image (Total Area in sq cm vs. Rate)
+    const RATE_TABLE = [
+      { area: 30000, rate: 0.35 },
+      { area: 25000, rate: 0.38 },
+      { area: 20000, rate: 0.40 },
+      { area: 15000, rate: 0.42 },
+      { area: 10000, rate: 0.45 },
+      { area: 6000, rate: 0.48 },
+      { area: 3000, rate: 0.50 }
+    ];
+
+    /**
+     * Determines the rate per sq cm based on the total calculated area.
+     * Total Area = (Length * Width) * Quantity / 100
+     */
+    function getRatePerSqCm(totalAreaSqCm) {
+      // Rates are tiered: if totalArea is >= the tier value, the rate applies.
+      // We iterate from largest area to smallest to find the lowest rate that applies.
+      for (const tier of RATE_TABLE) {
+        if (totalAreaSqCm >= tier.area) {
+          return tier.rate;
+        }
+      }
+      // If area is less than the lowest tier (3000 sq cm), use the highest rate.
+      return 0.50; 
+    }
+
+    function validateQuantity() {
+      const quantityInput = document.getElementById('quantity');
+      const quantity = parseInt(quantityInput.value); 
+      // Validation Logic: (quantity % 3 == 0) OR (quantity % 5 == 0)
+      return (quantity % 3 === 0) || (quantity % 5 === 0);
+    }
+    
+    function validateDimensions() {
+      const dimX = parseInt(document.getElementById('dim-x').value);
+      const dimY = parseInt(document.getElementById('dim-y').value);
+      const MIN = 15;
+      const MAX = 350;
+      
+      // Validation Logic: Check if X and Y are within the required range
+      const isXValid = (dimX >= MIN) && (dimX <= MAX);
+      const isYValid = (dimY >= MIN) && (dimY <= MAX);
+
+      return isXValid && isYValid;
+    }
+
+    function calculateQuote() {
+      // 1. Get Input Values
+      const length_mm = parseInt(document.getElementById('dim-x').value);
+      const width_mm = parseInt(document.getElementById('dim-y').value);
+      const quantity = parseInt(document.getElementById('quantity').value);
+
+      // 2. Calculate Area in sq cm (Formula component: (LENGTH * WIDTH) / 100)
+      // Conversion from mm to cm is 10 mm = 1 cm.
+      // Area in sq mm = L_mm * W_mm
+      // Area in sq cm = Area in sq mm / 100
+      const area_sq_cm = (length_mm * width_mm) / 100;
+      
+      // 3. Calculate Total Area (Area in sq cm * Quantity)
+      const total_area_sq_cm = area_sq_cm * quantity;
+
+      // 4. Determine Rate
+      const rate_per_sq_cm = getRatePerSqCm(total_area_sq_cm);
+
+      // 5. Calculate Material Cost (Formula component: [(LENGTH * WIDTH)/100] * [RATE PER CM2] * QUANTITY)
+      // This is exactly: total_area_sq_cm * rate_per_sq_cm
+      const material_cost = total_area_sq_cm * rate_per_sq_cm;
+
+      // 6. Calculate Final Price (Formula: Material Cost + Setup Charges)
+      const final_price = material_cost + SETUP_CHARGES;
+      
+      return final_price;
+    }
+
+    // Main validation and quote function called on form submission
+    function validateForm(event) {
+      event.preventDefault(); // Temporarily prevent submission until validation passes
+      
+      const isQuantityValid = validateQuantity();
+      const isDimensionValid = validateDimensions();
+      let isValid = true;
+      
+      // Get elements for error display
+      const quantityInput = document.getElementById('quantity');
+      const dimXInput = document.getElementById('dim-x');
+      const dimYInput = document.getElementById('dim-y');
+      const quantityErrorNote = document.getElementById('quantity-error-note');
+      const dimErrorNote = document.getElementById('dim-error-note');
+      const quoteResultDiv = document.getElementById('quote-result');
+
+      // --- 1. Quantity Validation ---
+      if (!isQuantityValid) {
+        quantityInput.style.border = '2px solid #ff0000';
+        quantityErrorNote.style.color = '#ff0000';
+        isValid = false;
+      } else {
+        quantityInput.style.border = '1px solid #ccc'; 
+        quantityErrorNote.style.color = '#cc0000'; // Reset note color
+      }
+
+      // --- 2. Dimension Validation ---
+      if (!isDimensionValid) {
+        dimXInput.style.border = '2px solid #ff0000';
+        dimYInput.style.border = '2px solid #ff0000';
+        dimErrorNote.style.display = 'block';
+        isValid = false;
+      } else {
+        dimXInput.style.border = '1px solid #ccc';
+        dimYInput.style.border = '1px solid #ccc';
+        dimErrorNote.style.display = 'none';
+      }
+
+      // --- 3. Quote Generation ---
+      if (isValid) {
+        const quote = calculateQuote();
+        
+        // Format the price to two decimal places and display
+        const formattedPrice = quote.toFixed(2); 
+        
+        document.getElementById('total-price-display').innerText = `₹ ${formattedPrice}`;
+        quoteResultDiv.style.display = 'block'; // Show the quote result box
+        
+        // You could also use an alert if preferred:
+        // alert(`Your Instant Quote is: ₹${formattedPrice}. (Includes ₹800 Setup Charges)`);
+
+      } else {
+        // Hide previous quote if errors occur
+        quoteResultDiv.style.display = 'none';
+        
+        // Combined error message (optional, as fields are highlighted)
+        alert("Please correct the errors marked in red before generating the quote.");
+      }
+
+      return false; // Form is handled by JavaScript, so we always return false to prevent native form submission.
+    }
+  </script>
+  <script>
+    // Menu toggle functionality
+    document.getElementById('menu-toggle').addEventListener('click', function() {
+      var options = document.getElementById('options');
+      if (options.style.display === 'flex') {
+        options.style.display = 'none';  // Hide if visible
+      } else {
+        options.style.display = 'flex';  // Show if hidden
+      }
+      // Alternatively, use a class for better practice
+      options.classList.toggle('active');
+    });
+  </script>
 </body>
 </html>
