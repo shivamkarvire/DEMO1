@@ -305,21 +305,23 @@
       return false; // Form is handled by JavaScript, so we always return false to prevent native form submission.
     }
   </script>
-  <script>
-    // Menu toggle functionality
-    document.getElementById('menu-toggle').addEventListener('click', function() {
+<script>
+  document.getElementById('menu-toggle').addEventListener('click', function() {
+    var options = document.getElementById('options');
+    options.classList.toggle('active');
+  });
+
+  // New code to close the menu when a link is clicked
+  document.querySelectorAll('#options a').forEach(function(link) {
+    link.addEventListener('click', function() {
       var options = document.getElementById('options');
-      if (options.style.display === 'flex') {
-        options.style.display = 'none';  // Hide if visible
-      } else {
-        options.style.display = 'flex';  // Show if hidden
-      }
-      // Alternatively, use a class for better practice
-      options.classList.toggle('active');
+      options.classList.remove('active');  // Remove the active class to close the menu
     });
-  </script>
+  });
+</script>
 </body>
 </html>
+
 
 
 
