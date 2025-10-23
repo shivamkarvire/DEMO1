@@ -109,7 +109,7 @@ body {
 
 .banner-overlay {
   position: absolute;
-  opacity: 0.7;
+  opacity: 0.5;
   top: 0;
   left: 0;
   width: 100%;
@@ -656,3 +656,4 @@ body {
     font-size: 1.5rem;
   }
 }
+
