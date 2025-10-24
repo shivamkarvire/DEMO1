@@ -73,16 +73,17 @@
     </section>
     
     <section class="services">
-      <h2>SINGLE LAYER PCBs</h2>
-      <p>
-        A single-layer PCB is a circuit board with a single conductive copper layer on one side of a non-conductive substrate, making it simple and inexpensive to manufacture.
-      </p>
+      <h3>Single & Double Layer PCB Design:</h3>
+        <p>
+          We offer professional design services for both single and double-layer PCBs to meet your project's needs.
+        </p>
     </section>
 
     <section class="services">
-      <h2>DOUBLE LAYER PCBs</h2>
+      
+      <h3>Single Layer PCB Manufacturing:</h3>
       <p>
-        A double-layer PCB (also known as a two-layer or double-sided PCB) is a printed circuit board with a conductive copper layer on both its top and bottom surfaces.
+        We exclusively manufacture single-layer boards, providing a cost-effective and reliable solution for simple electronic applications.
       </p>
     </section>
     
@@ -91,15 +92,6 @@
     </section>
     <section class="about-us">
       <div class="container">
-        <h3>Single & Double Layer PCB Design:</h3>
-        <p>
-          We offer professional design services for both single and double-layer PCBs to meet your project's needs.
-        </p>
-        <h3>Single Layer PCB Manufacturing:</h3>
-        <p>
-          We exclusively manufacture single-layer boards, providing a cost-effective and reliable solution for simple electronic applications.
-        </p>
-
         <h3>Why choose our Single-Layer Manufacturing?</h3>
         <h4>Quality and Expertise:</h4>
         <p>
@@ -127,7 +119,6 @@
         <ul class="highlights">
           <li><i class="fas fa-cogs"></i> Custom PCB Manufacturing — 100% to your design</li>
           <li><i class="fas fa-clock"></i> On-Time Delivery — Fast lead times</li>
-          <li><i class="fas fa-check-circle"></i> Quality First — IPC-compliant process</li>
           <li><i class="fas fa-headset"></i> Client Support — Technical guidance</li>
         </ul>
       </div>
@@ -228,40 +219,52 @@
 
   <script>
     // Constants from the problem description
-    const SETUP_CHARGES = 800;
+    const MAX_AREA_SQCM_LIMIT = 36000;
     
     // Rate table derived from the handwritten image (Total Area in sq cm vs. Rate)
     const RATE_TABLE = [
       { area: 30000, rate: 0.35 },
-      { area: 25001, rate: 0.38 },
-      { area: 20001, rate: 0.40 },
-      { area: 15001, rate: 0.42 },
-      { area: 10001, rate: 0.45 },
-      { area: 6001, rate: 0.45 },
-      { area: 3001, rate: 0.48 },
-      { area: 0, rate: 0.50 }
+      { area: 25000, rate: 0.38 },
+      { area: 20000, rate: 0.40 },
+      { area: 15000, rate: 0.42 },
+      { area: 10000, rate: 0.45 },
+      { area: 6000, rate: 0.48 }, 
+      { area: 3000, rate: 0.50 }
     ];
 
     /**
+     * Determines the setup charges based on the total area in sq cm.
+     */
+    function getSetupCharges(totalAreaSqCm) {
+      if (totalAreaSqCm > 25000 && totalAreaSqCm <= 30000) {
+        return 400; // Slab 25001 to 30000 sqcm
+      } else if (totalAreaSqCm > 20000 && totalAreaSqCm <= 25000) {
+        return 600; // Slab 20001 to 25000 sqcm
+      } else if (totalAreaSqCm >= 0 && totalAreaSqCm <= 20000) {
+        return 800; // Slab 0 to 20000 sqcm
+      } else {
+        // Default for any area exceeding 30000 (up to the 36000 limit)
+        return 400;
+      }
+    }
+
+
+    /**
      * Determines the rate per sq cm based on the total calculated area.
-     * Total Area = (Length * Width) * Quantity / 100
      */
     function getRatePerSqCm(totalAreaSqCm) {
-      // Rates are tiered: if totalArea is >= the tier value, the rate applies.
       // We iterate from largest area to smallest to find the lowest rate that applies.
       for (const tier of RATE_TABLE) {
         if (totalAreaSqCm >= tier.area) {
           return tier.rate;
         }
       }
-      // If area is less than the lowest tier (3000 sq cm), use the highest rate.
       return 0.50; 
     }
 
     function validateQuantity() {
       const quantityInput = document.getElementById('quantity');
       const quantity = parseInt(quantityInput.value); 
-      // Validation Logic: (quantity % 3 == 0) OR (quantity % 5 == 0)
       return (quantity % 3 === 0) || (quantity % 5 === 0);
     }
     
@@ -271,68 +274,60 @@
       const MIN = 15;
       const MAX = 350;
       
-      // Validation Logic: Check if X and Y are within the required range
       const isXValid = (dimX >= MIN) && (dimX <= MAX);
       const isYValid = (dimY >= MIN) && (dimY <= MAX);
 
       return isXValid && isYValid;
     }
 
-    function calculateQuote() {
-      // 1. Get Input Values
-      const length_mm = parseInt(document.getElementById('dim-x').value);
-      const width_mm = parseInt(document.getElementById('dim-y').value);
-      const quantity = parseInt(document.getElementById('quantity').value);
+    function calculateTotalArea(length_mm, width_mm, quantity) {
+        // Area in sq cm: (L_mm * W_mm) / 100
+        const area_sq_cm = (length_mm * width_mm) / 100;
+        // Total Area: Area in sq cm * Quantity
+        return area_sq_cm * quantity;
+    }
 
-      // 2. Calculate Area in sq cm (Formula component: (LENGTH * WIDTH) / 100)
-      // Conversion from mm to cm is 10 mm = 1 cm.
-      // Area in sq mm = L_mm * W_mm
-      // Area in sq cm = Area in sq mm / 100
-      const area_sq_cm = (length_mm * width_mm) / 100;
+    function calculateQuote(total_area_sq_cm) {
       
-      // 3. Calculate Total Area (Area in sq cm * Quantity)
-      const total_area_sq_cm = area_sq_cm * quantity;
-
-      // 4. Determine Rate
       const rate_per_sq_cm = getRatePerSqCm(total_area_sq_cm);
+      const setup_charge = getSetupCharges(total_area_sq_cm); 
 
-      // 5. Calculate Material Cost (Formula component: [(LENGTH * WIDTH)/100] * [RATE PER CM2] * QUANTITY)
-      // This is exactly: total_area_sq_cm * rate_per_sq_cm
+      // Calculate Material Cost: total_area_sq_cm * rate_per_sq_cm
       const material_cost = total_area_sq_cm * rate_per_sq_cm;
 
-      // 6. Calculate Final Price (Formula: Material Cost + Setup Charges)
-      const final_price = material_cost + SETUP_CHARGES;
+      // Calculate Final Price: Material Cost + Setup Charges
+      const final_price = material_cost + setup_charge;
       
-      return final_price;
+      return { final_price: final_price, setup_charge: setup_charge };
     }
 
     // Main validation and quote function called on form submission
     function validateForm(event) {
-      event.preventDefault(); // Temporarily prevent submission until validation passes
+      event.preventDefault();
       
-      const isQuantityValid = validateQuantity();
-      const isDimensionValid = validateDimensions();
-      let isValid = true;
-      
-      // Get elements for error display
       const quantityInput = document.getElementById('quantity');
       const dimXInput = document.getElementById('dim-x');
       const dimYInput = document.getElementById('dim-y');
       const quantityErrorNote = document.getElementById('quantity-error-note');
       const dimErrorNote = document.getElementById('dim-error-note');
       const quoteResultDiv = document.getElementById('quote-result');
+      const totalPriceDisplay = document.getElementById('total-price-display');
+      const setupChargeNote = quoteResultDiv.querySelector('p:last-child');
 
-      // --- 1. Quantity Validation ---
+      const isQuantityValid = validateQuantity();
+      const isDimensionValid = validateDimensions();
+      let isValid = true;
+      
+      // --- Validation Logic ---
       if (!isQuantityValid) {
         quantityInput.style.border = '2px solid #ff0000';
         quantityErrorNote.style.color = '#ff0000';
         isValid = false;
       } else {
         quantityInput.style.border = '1px solid #ccc'; 
-        quantityErrorNote.style.color = '#cc0000'; // Reset note color
+        quantityErrorNote.style.color = '#cc0000';
       }
 
-      // --- 2. Dimension Validation ---
       if (!isDimensionValid) {
         dimXInput.style.border = '2px solid #ff0000';
         dimYInput.style.border = '2px solid #ff0000';
@@ -343,44 +338,41 @@
         dimYInput.style.border = '1px solid #ccc';
         dimErrorNote.style.display = 'none';
       }
-
-      // --- 3. Quote Generation ---
+      
+      // --- Critical Area Check (Runs if inputs are valid) ---
       if (isValid) {
-        const quote = calculateQuote();
-        
-        // Format the price to two decimal places and display
-        const formattedPrice = quote.toFixed(2); 
-        
-        document.getElementById('total-price-display').innerText = `₹ ${formattedPrice}`;
-        quoteResultDiv.style.display = 'block'; // Show the quote result box
-        
-        // You could also use an alert if preferred:
-        // alert(`Your Instant Quote is: ₹${formattedPrice}. (Includes ₹800 Setup Charges)`);
+          const length_mm = parseInt(dimXInput.value);
+          const width_mm = parseInt(dimYInput.value);
+          const quantity = parseInt(quantityInput.value);
+          const total_area_sq_cm = calculateTotalArea(length_mm, width_mm, quantity);
 
-      } else {
-        // Hide previous quote if errors occur
-        quoteResultDiv.style.display = 'none';
-        
-        // Combined error message (optional, as fields are highlighted)
-        alert("Please correct the errors marked in red before generating the quote.");
-      }
+          if (total_area_sq_cm > MAX_AREA_SQCM_LIMIT) {
+              isValid = false;
+              quoteResultDiv.style.display = 'none';
+              alert(`The total PCB area (${total_area_sq_cm.toFixed(2)} sqcm) exceeds the online quote limit (${MAX_AREA_SQCM_LIMIT} sqcm). Please email us for a custom quotation.`);
+          } else {
+              // --- Quote Generation ---
+              const quoteData = calculateQuote(total_area_sq_cm);
+              
+              const formattedPrice = quoteData.final_price.toFixed(2); 
+              
+              totalPriceDisplay.innerText = `₹ ${formattedPrice}`;
+              setupChargeNote.innerHTML = `(Includes ₹${quoteData.setup_charge} Setup Charges)`; 
+              
+              quoteResultDiv.style.display = 'block';
+          }
+      } 
+      
+      // Handle combined errors
+      // if (!isValid && quoteResultDiv.style.display !== 'block') {
+      //     // Only show this alert if a validation error occurred AND the MAX_AREA check wasn't triggered
+      //     if (quantityInput.style.border !== '2px solid #ff0000' && dimXInput.style.border !== '2px solid #ff0000') {
+      //          alert("Please correct the errors marked in red before generating the quote.");
+      //     }
+      // }
 
-      return false; // Form is handled by JavaScript, so we always return false to prevent native form submission.
+      return false;
     }
   </script>
-  <script>
-    document.getElementById('menu-toggle').addEventListener('click', function() {
-      var options = document.getElementById('options');
-      options.classList.toggle('active');
-    });
-  
-    // New code to close the menu when a link is clicked
-    document.querySelectorAll('#options a').forEach(function(link) {
-      link.addEventListener('click', function() {
-        var options = document.getElementById('options');
-        options.classList.remove('active');  // Remove the active class to close the menu
-      });
-    });
-  </script
 </body>
 </html> 
