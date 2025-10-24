@@ -244,7 +244,7 @@ body {
   border-bottom: 1px solid #e9ecef;
 }
 
-.services h2 {
+.services h3 {
   font-size: 1.8rem;
   color: #007BFF;
   margin-bottom: 15px;
@@ -381,6 +381,10 @@ body {
   width: 100px;
   margin-right: 5px;
   padding: 10px;
+}
+
+.instant-quote-btn.send-quote-mode {
+  background: linear-gradient(to right, #28a745, #218838); /* Green gradient */
 }
 
 .instant-quote-btn {
@@ -656,5 +660,3 @@ body {
     font-size: 1.5rem;
   }
 }
-
-
