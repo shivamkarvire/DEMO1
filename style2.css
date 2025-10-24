@@ -244,7 +244,7 @@ body {
   border-bottom: 1px solid #e9ecef;
 }
 
-.services h2 h3 {
+.services h3 {
   font-size: 1.8rem;
   color: #007BFF;
   margin-bottom: 15px;
@@ -660,4 +660,5 @@ body {
     font-size: 1.5rem;
   }
 }
+
 
