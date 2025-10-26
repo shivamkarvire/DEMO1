@@ -391,6 +391,20 @@
       return false;
     }
   </script>
+  <script>
+    // Menu toggle functionality
+    document.getElementById('menu-toggle').addEventListener('click', function() {
+      var options = document.getElementById('options');
+      if (options.style.display === 'flex') {
+        options.style.display = 'none';  // Hide if visible
+      } else {
+        options.style.display = 'flex';  // Show if hidden
+      }
+      // Alternatively, use a class for better practice
+      options.classList.toggle('active');
+    });
+  </script>
 </body>
 </html> 
+
 
